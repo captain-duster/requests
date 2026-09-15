@@ -146,18 +146,6 @@ if sys.platform == "win32":
             return proxy_bypass_registry(host)
 
 
-def is_https(url: _t.UriType) -> bool:
-    try:
-        scheme = urlparse(url).scheme
-    except ValueError:
-        return False
-
-    if not scheme:
-        return False
-
-    return scheme.lower() == "https"
-
-
 def dict_to_sequence(
     d: _t.SupportsItems[Any, Any] | Iterable[tuple[Any, Any]],
 ) -> Iterable[tuple[Any, Any]]:
@@ -297,6 +285,17 @@ def guess_filename(obj: Any) -> str | None:
     name = getattr(obj, "name", None)
     if name and isinstance(name, (str, bytes)) and name[0] != "<" and name[-1] != ">":
         return os.path.basename(name)  # type: ignore[return-value]  # urllib3 accepts bytes but types str only
+
+
+def is_valid_url(url: str) -> bool:
+    """Runs the URL through the parser to check if it's a valid HTTP or
+    HTTPS URL."""
+    try:
+        parsed = urlparse(url)
+    except (ValueError, AttributeError):
+        return False
+
+    return parsed.scheme in ("http", "https")
 
 
 def extract_zipped_paths(path: str) -> str:
