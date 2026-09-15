@@ -26,6 +26,7 @@ from requests.utils import (
     get_netrc_auth,
     guess_filename,
     guess_json_utf,
+    is_ftp_url,
     is_ipv4_address,
     is_valid_cidr,
     iter_slices,
@@ -307,6 +308,31 @@ class TestIsValidCIDR:
     )
     def test_invalid(self, value):
         assert not is_valid_cidr(value)
+
+
+class TestIsFtpUrl:
+    @pytest.mark.parametrize(
+        "value",
+        (
+            "ftp://ftp.example.com/",
+            "ftps://ftp.example.com/",
+        ),
+    )
+    def test_valid(self, value):
+        assert is_ftp_url(value)
+
+    @pytest.mark.parametrize(
+        "value",
+        (
+            "http://example.com/",
+            "https://example.com/",
+            "example.com",
+            "",
+            "/path/to/file",
+        ),
+    )
+    def test_invalid(self, value):
+        assert not is_ftp_url(value)
 
 
 class TestAddressInNetwork:
