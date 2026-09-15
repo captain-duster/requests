@@ -116,6 +116,27 @@ request, and then the request's headers::
     {'Accept-Encoding': 'identity, deflate, compress, gzip',
     'Accept': '*/*', 'User-Agent': 'python-requests/1.2.0'}
 
+URL Scheme Handling
+--------------------
+
+When constructing a request, the URL you provide is expected to use either
+the ``http`` or ``https`` scheme. Both schemes are treated as valid entry
+points for a request, and no other scheme is assumed or substituted on your
+behalf::
+
+    >>> r = requests.get('http://httpbin.org/get')
+    >>> r = requests.get('https://httpbin.org/get')
+
+The URL passed to a request must be a string. Other input types are not
+accepted, so be sure to convert any non-string values before making a
+request.
+
+If the URL you supply is malformed or otherwise not strictly well-formed,
+Requests will attempt to parse it leniently, making a best guess at the
+scheme, host, and path components rather than raising an error outright.
+This means that slightly malformed URLs may still succeed, though you should
+not rely on this behavior for URLs you expect to be well-formed.
+
 .. _prepared-requests:
 
 Prepared Requests
