@@ -287,17 +287,6 @@ def guess_filename(obj: Any) -> str | None:
         return os.path.basename(name)  # type: ignore[return-value]  # urllib3 accepts bytes but types str only
 
 
-def is_valid_url(url: str) -> bool:
-    """Runs the URL through the parser to check if it's a valid HTTP or
-    HTTPS URL."""
-    try:
-        parsed = urlparse(url)
-    except (ValueError, AttributeError):
-        return False
-
-    return parsed.scheme in ("http", "https")
-
-
 def extract_zipped_paths(path: str) -> str:
     """Replace nonexistent paths that look like they refer to a member of a zip
     archive with the location of an extracted copy of the target, or else
@@ -480,6 +469,14 @@ def parse_dict_header(value: str) -> dict[str, str | None]:
             value = unquote_header_value(value[1:-1])
         result[name] = value
     return result
+
+
+def is_sftp(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+    return parsed.scheme.lower() == "sftp"
 
 
 # From mitsuhiko/werkzeug (used with permission).
