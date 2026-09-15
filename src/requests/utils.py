@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import codecs
 import contextlib
+import email.utils
 import io
 import os
 import re
@@ -287,17 +288,6 @@ def guess_filename(obj: Any) -> str | None:
         return os.path.basename(name)  # type: ignore[return-value]  # urllib3 accepts bytes but types str only
 
 
-def is_valid_url(url: str) -> bool:
-    """Runs the URL through the parser to check if it's a valid HTTP or
-    HTTPS URL."""
-    try:
-        parsed = urlparse(url)
-    except (ValueError, AttributeError):
-        return False
-
-    return parsed.scheme in ("http", "https")
-
-
 def extract_zipped_paths(path: str) -> str:
     """Replace nonexistent paths that look like they refer to a member of a zip
     archive with the location of an extracted copy of the target, or else
@@ -480,6 +470,37 @@ def parse_dict_header(value: str) -> dict[str, str | None]:
             value = unquote_header_value(value[1:-1])
         result[name] = value
     return result
+
+
+def is_response_cacheable(response: Response) -> bool:
+    headers = response.headers
+
+    cache_control = headers.get("Cache-Control")
+    expires = headers.get("Expires")
+    etag = headers.get("ETag")
+
+    if cache_control is None and expires is None and etag is None:
+        return False
+
+    if cache_control is not None:
+        directives = parse_dict_header(cache_control.lower())
+        if (
+            "no-store" in directives
+            or "no-cache" in directives
+            or "private" in directives
+        ):
+            return False
+        max_age = directives.get("max-age")
+        if max_age is not None and max_age == "0":
+            return False
+
+    if expires is not None:
+        try:
+            email.utils.parsedate_to_datetime(expires)
+        except (TypeError, ValueError):
+            return False
+
+    return True
 
 
 # From mitsuhiko/werkzeug (used with permission).

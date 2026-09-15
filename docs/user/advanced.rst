@@ -116,27 +116,6 @@ request, and then the request's headers::
     {'Accept-Encoding': 'identity, deflate, compress, gzip',
     'Accept': '*/*', 'User-Agent': 'python-requests/1.2.0'}
 
-URL Scheme Handling
---------------------
-
-When constructing a request, the URL you provide is expected to use either
-the ``http`` or ``https`` scheme. Both schemes are treated as valid entry
-points for a request, and no other scheme is assumed or substituted on your
-behalf::
-
-    >>> r = requests.get('http://httpbin.org/get')
-    >>> r = requests.get('https://httpbin.org/get')
-
-The URL passed to a request must be a string. Other input types are not
-accepted, so be sure to convert any non-string values before making a
-request.
-
-If the URL you supply is malformed or otherwise not strictly well-formed,
-Requests will attempt to parse it leniently, making a best guess at the
-scheme, host, and path components rather than raising an error outright.
-This means that slightly malformed URLs may still succeed, though you should
-not rely on this behavior for URLs you expect to be well-formed.
-
 .. _prepared-requests:
 
 Prepared Requests
@@ -315,6 +294,40 @@ For the sake of security we recommend upgrading certifi frequently!
 .. _connection pooling: https://urllib3.readthedocs.io/en/latest/reference/urllib3.connectionpool.html
 .. _certifi: https://certifiio.readthedocs.io/
 .. _Mozilla trust store: https://hg.mozilla.org/mozilla-central/raw-file/tip/security/nss/lib/ckfw/builtins/certdata.txt
+
+.. _cacheable-responses:
+
+Determining if a Response is Cacheable
+---------------------------------------
+
+Requests provides the ``is_response_cacheable`` utility function to determine
+whether a :class:`Response <requests.Response>` object may be cached,
+following the caching rules described in `RFC 7234`_.
+
+``is_response_cacheable`` is a standalone function that takes a
+:class:`Response <requests.Response>` object as its argument and returns
+``True`` or ``False`` depending on the caching-related headers present on
+that response::
+
+    >>> r = requests.get('https://en.wikipedia.org/wiki/Monty_Python')
+    >>> is_response_cacheable(r)
+    True
+
+The function inspects the following headers, in accordance with RFC 7234:
+
+- ``Cache-Control``: if this header contains the ``no-store`` or
+  ``no-cache`` directives, the response is considered not cacheable.
+- ``Expires``: used to determine whether the response has an explicit
+  expiration time.
+- ``ETag``: used as a validator that a cache may rely on when revalidating
+  a stored response.
+
+If none of these headers (``Cache-Control``, ``Expires``, or ``ETag``) are
+present on the response, ``is_response_cacheable`` treats the response as
+not cacheable, since there is no information available to determine whether
+it is safe to store and reuse the response.
+
+.. _RFC 7234: https://tools.ietf.org/html/rfc7234
 
 .. _body-content-workflow:
 

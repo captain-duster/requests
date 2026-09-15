@@ -4,6 +4,10 @@ Release History
 dev
 ---
 
+- Added `is_response_cacheable` utility function to determine if a
+  response is cacheable per RFC 7234, based on `Cache-Control`,
+  `Expires`, and `ETag` headers. Responses missing these headers are
+  treated as not cacheable.
 - \[Short description of non-trivial change.\]
 
 
