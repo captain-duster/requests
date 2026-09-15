@@ -146,6 +146,18 @@ if sys.platform == "win32":
             return proxy_bypass_registry(host)
 
 
+def is_https(url: _t.UriType) -> bool:
+    try:
+        scheme = urlparse(url).scheme
+    except ValueError:
+        return False
+
+    if not scheme:
+        return False
+
+    return scheme.lower() == "https"
+
+
 def dict_to_sequence(
     d: _t.SupportsItems[Any, Any] | Iterable[tuple[Any, Any]],
 ) -> Iterable[tuple[Any, Any]]:
