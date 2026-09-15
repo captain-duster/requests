@@ -157,6 +157,23 @@ def dict_to_sequence(
     return d
 
 
+def is_ftps_url(url: str) -> bool:
+    """Returns True if the given URL uses the FTPS scheme, False otherwise.
+
+    Raises a ValueError if the URL is invalid, scheme-less, or malformed.
+    """
+    try:
+        parsed = urlparse(url)
+    except ValueError as e:
+        raise ValueError(f"Invalid URL {url!r}: {e}") from e
+
+    scheme = parsed.scheme
+    if not scheme:
+        raise ValueError(f"URL {url!r} does not contain a scheme")
+
+    return scheme.lower() == "ftps"
+
+
 def super_len(o: Any) -> int:
     total_length = None
     current_position = 0
@@ -285,17 +302,6 @@ def guess_filename(obj: Any) -> str | None:
     name = getattr(obj, "name", None)
     if name and isinstance(name, (str, bytes)) and name[0] != "<" and name[-1] != ">":
         return os.path.basename(name)  # type: ignore[return-value]  # urllib3 accepts bytes but types str only
-
-
-def is_valid_url(url: str) -> bool:
-    """Runs the URL through the parser to check if it's a valid HTTP or
-    HTTPS URL."""
-    try:
-        parsed = urlparse(url)
-    except (ValueError, AttributeError):
-        return False
-
-    return parsed.scheme in ("http", "https")
 
 
 def extract_zipped_paths(path: str) -> str:

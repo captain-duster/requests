@@ -184,6 +184,7 @@ from .exceptions import (
 from .models import PreparedRequest, Request, Response
 from .sessions import Session, session
 from .status_codes import codes
+from .utils import is_ftps_url
 
 __all__ = (
     "ConnectionError",
@@ -203,6 +204,7 @@ __all__ = (
     "delete",
     "get",
     "head",
+    "is_ftps_url",
     "options",
     "packages",
     "patch",
