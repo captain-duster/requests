@@ -5,6 +5,9 @@ dev
 ---
 
 - \[Short description of non-trivial change.\]
+- Added `is_ftp_url` helper function in `requests/utils.py` to detect FTP/FTPS
+  URL schemes using `urlparse`, returning `False` for empty or scheme-less
+  URLs.
 
 
 2.34.2 (2026-05-14)
